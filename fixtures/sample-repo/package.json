@@ -1,0 +1,10 @@
+{
+  "name": "acme-sample-app",
+  "version": "1.0.0",
+  "license": "MIT",
+  "dependencies": {
+    "clean-mit": "^1.0.0",
+    "copyleft-tool": "^2.0.0",
+    "mystery-lib": "^0.1.0"
+  }
+}

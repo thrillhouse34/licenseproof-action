@@ -1,0 +1,104 @@
+name: 'LicenseProof'
+description: 'Scan your dependency tree for license conflicts and fail the build on the ones you care about.'
+author: 'LicenseProof'
+
+branding:
+  icon: 'file-text'
+  color: 'blue'
+
+inputs:
+  path:
+    description: 'Project path to scan, relative to the workspace. Must contain a package.json / lockfile (npm) or a Python manifest (PyPI).'
+    required: false
+    default: '.'
+  fail-on:
+    description: 'When to fail the job: conflict (default), review, or never.'
+    required: false
+    default: 'conflict'
+  include-dev:
+    description: 'Set to true to include devDependencies. Production dependencies only by default.'
+    required: false
+    default: 'false'
+  project-license:
+    description: 'SPDX id or expression for your own project, overriding the one in package.json. Set this if your manifest says UNLICENSED but you ship under something else.'
+    required: false
+    default: ''
+  version:
+    description: 'Version of the licenseproof npm package to run. Pinned by default; override only to test a newer release.'
+    required: false
+    default: '0.3.3'
+  out:
+    description: 'Directory for report.json and summary.md. Defaults to a directory under the runner temp dir, so your checkout stays clean.'
+    required: false
+    default: ''
+  summary:
+    description: 'Set to false to skip writing the report to the job summary.'
+    required: false
+    default: 'true'
+  upload-artifact:
+    description: 'Set to false to skip uploading the report as a build artifact.'
+    required: false
+    default: 'true'
+  artifact-name:
+    description: 'Name of the uploaded artifact.'
+    required: false
+    default: 'licenseproof-report'
+  artifact-retention-days:
+    description: 'Days before the uploaded artifact expires. 0 uses the repository default, which is what actions/upload-artifact documents for this value.'
+    required: false
+    default: '0'
+
+outputs:
+  outcome:
+    description: 'pass or fail — whether the scan tripped the fail-on threshold.'
+    value: ${{ steps.scan.outputs.outcome }}
+  total-packages:
+    description: 'Number of packages scanned.'
+    value: ${{ steps.scan.outputs.total-packages }}
+  conflict-count:
+    description: 'Packages whose license conflicts with your project license.'
+    value: ${{ steps.scan.outputs.conflict-count }}
+  review-count:
+    description: 'Packages needing a human look (not counting unknowns).'
+    value: ${{ steps.scan.outputs.review-count }}
+  unknown-count:
+    description: 'Packages whose license could not be resolved.'
+    value: ${{ steps.scan.outputs.unknown-count }}
+  agpl-count:
+    description: 'Packages carrying an AGPL networked-use obligation.'
+    value: ${{ steps.scan.outputs.agpl-count }}
+  report-path:
+    description: 'Absolute path to the machine-readable report.json.'
+    value: ${{ steps.scan.outputs.report-path }}
+  summary-path:
+    description: 'Absolute path to the Markdown summary.'
+    value: ${{ steps.scan.outputs.summary-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    # The whole behaviour lives in scripts/run.sh so that scripts/simulate.sh can
+    # exercise the identical code path locally. Keep logic out of this file.
+    - id: scan
+      shell: bash
+      run: bash "$GITHUB_ACTION_PATH/scripts/run.sh"
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_INCLUDE_DEV: ${{ inputs.include-dev }}
+        INPUT_PROJECT_LICENSE: ${{ inputs.project-license }}
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_OUT: ${{ inputs.out }}
+        INPUT_SUMMARY: ${{ inputs.summary }}
+
+    # always() so the report still lands when the scan failed the job — that is
+    # exactly the run you want the artifact for.
+    - if: ${{ always() && inputs.upload-artifact == 'true' && steps.scan.outputs.report-path != '' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          ${{ steps.scan.outputs.report-path }}
+          ${{ steps.scan.outputs.summary-path }}
+        retention-days: ${{ inputs.artifact-retention-days }}
+        if-no-files-found: error
