@@ -45,7 +45,10 @@ if ! node -e 'JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"))' "$
   exit "$SCAN_RC"
 fi
 
-node "$(dirname "$0")/summary.js" "$REPORT" "$SCAN_RC" "$FAIL_ON" "$OUTPUTS" > "$SUMMARY" || exit 2
+# INPUT_HAS_LICENSE_KEY is a bare "true"/"false", never the key itself — this
+# script has no business holding key material. It only decides whether the job
+# summary carries the upsell block.
+node "$(dirname "$0")/summary.js" "$REPORT" "$SCAN_RC" "$FAIL_ON" "$OUTPUTS" "${INPUT_HAS_LICENSE_KEY:-false}" > "$SUMMARY" || exit 2
 
 cat "$SUMMARY"
 
