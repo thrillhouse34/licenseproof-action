@@ -7,7 +7,7 @@ against your checked-out repository, writes the result to the job summary, uploa
 as a build artifact, and fails the job when it finds something you said you cared about.
 
 It is a **composite** action: `licenseproof` is already published to npm, so the action
-is a thin wrapper that `npx`-runs a pinned version (`0.3.3`). No bundled `node_modules`
+is a thin wrapper that `npx`-runs a pinned version (`0.3.4`). No bundled `node_modules`
 to keep in sync, and the thing the action runs is byte-for-byte the release you can run
 locally yourself.
 
@@ -88,7 +88,7 @@ Never paste the key in as a literal — always a secret. See
 | `fail-on` | `conflict` | When to fail the job: `conflict`, `review`, or `never`. Any other value is rejected with exit 2 rather than silently defaulted. |
 | `include-dev` | `false` | `true` to include `devDependencies`. Production dependencies only otherwise. |
 | `project-license` | _(empty)_ | SPDX id or expression for your own project, overriding `package.json`. Set it when your manifest says `UNLICENSED` but you ship under something real — the conflict rules key off this. |
-| `version` | `0.3.3` | Version of the `licenseproof` npm package to run. Pinned; override only to try a newer release. |
+| `version` | `0.3.4` | Version of the `licenseproof` npm package to run. Pinned; override only to try a newer release. |
 | `out` | _(empty)_ | Directory for `report.json` and `summary.md`. Defaults to a directory under the runner temp dir, so your checkout stays clean. |
 | `summary` | `true` | `false` to skip writing to the job summary. |
 | `upload-artifact` | `true` | `false` to skip the artifact upload. |

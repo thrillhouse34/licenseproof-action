@@ -26,7 +26,7 @@ inputs:
   version:
     description: 'Version of the licenseproof npm package to run. Pinned by default; override only to test a newer release.'
     required: false
-    default: '0.3.3'
+    default: '0.3.4'
   out:
     description: 'Directory for report.json and summary.md. Defaults to a directory under the runner temp dir, so your checkout stays clean.'
     required: false
@@ -54,7 +54,7 @@ inputs:
   # arrives here as an empty string, so a half-configured workflow degrades to
   # the free scan rather than failing.
   license-key:
-    description: 'Your paid licenseproof key, to also generate the full report. Pass it from a secret — license-key: ${{ secrets.LICENSEPROOF_LICENSE_KEY }} — never as a literal. Leave empty for the free scan only.'
+    description: 'Your paid licenseproof key, to also generate the full report. Pass it from a secret (secrets.LICENSEPROOF_LICENSE_KEY), never as a literal. Leave empty for the free scan only.'
     required: false
     default: ''
   report-formats:
